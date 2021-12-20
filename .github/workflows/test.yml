@@ -42,3 +42,8 @@ jobs:
           repo-url: https://artifacts.central.labs.bankifi.com/artifactory/helm
           repo-username: ${{ secrets.ARTIFACTORY_USERNAME }}
           repo-password: ${{ secrets.ARTIFACTORY_PASSWORD }}
+          value-files: >-
+            [
+              "./helm/test_values1.yaml",
+              "./helm/test_values2.yaml"
+            ]

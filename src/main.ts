@@ -16,19 +16,19 @@ const REGISTRY_CONFIG = './.cache/helm/registry.json'
 //   }
 // }
 
-// function parseValueFiles(): string[] {
-//   const valueFiles = core.getInput('value-files')
-//   if (valueFiles) {
-//     try {
-//       return JSON.parse(valueFiles)
-//     } catch (err) {
-//       // assume it is a single file
-//       return [valueFiles]
-//     }
-//   } else {
-//     return []
-//   }
-// }
+function parseValueFiles(): string[] {
+  const valueFiles = core.getInput('value-files')
+  if (valueFiles) {
+    try {
+      return JSON.parse(valueFiles)
+    } catch (err) {
+      // assume it is a single file
+      return [valueFiles]
+    }
+  } else {
+    return []
+  }
+}
 
 async function doAddRepository(cmd: string): Promise<void> {
   const alias = core.getInput('repo-alias')
@@ -56,7 +56,7 @@ async function doUpgrade(cmd: string): Promise<void> {
   const chartVersion = core.getInput('chart-version')
   const dryRun = core.getBooleanInput('dry-run')
   // const values = parseValues()
-  // const valueFiles = parseValueFiles()
+  const valueFiles = parseValueFiles()
 
   const args = [
     'upgrade',
@@ -66,6 +66,8 @@ async function doUpgrade(cmd: string): Promise<void> {
     '--wait',
     `--namespace=${namespace}`
   ]
+
+  args.concat(valueFiles.join(','))
 
   if (chartVersion) args.push(`--version=${chartVersion}`)
   if (dryRun) args.push(`--dry-run`)
