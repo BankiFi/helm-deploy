@@ -22,7 +22,7 @@ jobs:
       - uses: azure/setup-helm@v1
         id: helm
         with:
-          helm-version: '3.*'
+          version: '3.*'
 
       - uses: ./
         with:

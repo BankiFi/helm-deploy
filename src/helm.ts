@@ -1,5 +1,7 @@
 import * as exec from '@actions/exec'
 
+const REGISTRY_CONFIG = "./.cache/helm/registry.json"
+
 export async function addRepository(
   cmd: string,
   alias: string,
@@ -12,10 +14,19 @@ export async function addRepository(
   if (username) args.push(`--username=${username}`)
   if (password) args.push(`--password=${password}`)
 
-  await exec.exec(cmd, args)
-  await exec.exec(cmd, ['repo', 'update'])
+  await execHelm(cmd, args)
+  await execHelm(cmd, ['repo', 'update'])
 
   return Promise.resolve()
+}
+
+async function execHelm(cmd: string, args: string[]): Promise<void> {
+  const fullArgs = [
+    `--registry-config=${REGISTRY_CONFIG}`
+  ];
+  fullArgs.concat(args);
+
+  await exec.exec(cmd, fullArgs);
 }
 
 // export async function deploy(release: string): Promise<void> {}
