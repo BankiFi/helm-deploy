@@ -24,6 +24,10 @@ jobs:
 
       - uses: ./
         with:
+          release: test
+          namespace: test
+          chart: "bankifi/microservice"
+          dry-run: true
           repo-alias: bankifi
           repo-url: https://artifacts.central.labs.bankifi.com/artifactory/helm
           repo-username: ${{ secrets.ARTIFACTORY_USERNAME }}
