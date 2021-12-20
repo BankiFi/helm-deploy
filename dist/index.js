@@ -97,7 +97,6 @@ function doUpgrade(cmd) {
             '--wait',
             `--namespace=${namespace}`
         ];
-        args.concat(valueFiles.join(','));
         if (chartVersion)
             args.push(`--version=${chartVersion}`);
         if (dryRun)
@@ -105,7 +104,7 @@ function doUpgrade(cmd) {
         // Object.entries(values).forEach((key, value) => {
         //   args.push(`--set ${key}=${value}`)
         // })
-        yield execHelm(cmd, args);
+        yield execHelm(cmd, args.concat(valueFiles.join(',')));
     });
 }
 function execHelm(cmd, args) {

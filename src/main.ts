@@ -67,8 +67,6 @@ async function doUpgrade(cmd: string): Promise<void> {
     `--namespace=${namespace}`
   ]
 
-  args.concat(valueFiles.join(','))
-
   if (chartVersion) args.push(`--version=${chartVersion}`)
   if (dryRun) args.push(`--dry-run`)
 
@@ -76,7 +74,7 @@ async function doUpgrade(cmd: string): Promise<void> {
   //   args.push(`--set ${key}=${value}`)
   // })
 
-  await execHelm(cmd, args)
+  await execHelm(cmd, args.concat(valueFiles.join(',')))
 }
 
 async function execHelm(cmd: string, args: string[]): Promise<void> {
