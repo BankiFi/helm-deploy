@@ -1,16 +1,23 @@
 import * as core from '@actions/core'
-import {wait} from './wait'
+// import * as exec from '@actions/exec'
+import {addRepository} from './helm'
+
+async function doAddRepository(): Promise<void> {
+  const alias = core.getInput('repo-alias')
+  const url = core.getInput('repo-url')
+  const username = core.getInput('repo-username')
+  const password = core.getInput('repo-password')
+
+  await addRepository(alias, url, username, password)
+}
 
 async function run(): Promise<void> {
   try {
-    const ms: string = core.getInput('milliseconds')
-    core.debug(`Waiting ${ms} milliseconds ...`) // debug is only output if you set the secret `ACTIONS_STEP_DEBUG` to true
+    process.env.XDG_DATA_HOME = '/root/.helm/'
+    process.env.XDG_CACHE_HOME = '/root/.helm/'
+    process.env.XDG_CONFIG_HOME = '/root/.helm/'
 
-    core.debug(new Date().toTimeString())
-    await wait(parseInt(ms, 10))
-    core.debug(new Date().toTimeString())
-
-    core.setOutput('time', new Date().toTimeString())
+    await doAddRepository()
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }
