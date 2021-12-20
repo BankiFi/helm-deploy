@@ -1,105 +1,101 @@
-<p align="center">
-  <a href="https://github.com/actions/typescript-action/actions"><img alt="typescript-action status" src="https://github.com/actions/typescript-action/workflows/build-test/badge.svg"></a>
-</p>
+# Helm Deploy Action
 
-# Create a JavaScript Action using TypeScript
+<!-- action-docs-description -->
+## Description
 
-Use this template to bootstrap the creation of a TypeScript action.:rocket:
+Deploy Kubernetes applications using helm
 
-This template includes compilation support, tests, a validation workflow, publishing, and versioning guidance.  
 
-If you are new, there's also a simpler introduction.  See the [Hello World JavaScript Action](https://github.com/actions/hello-world-javascript-action)
+<!-- action-docs-description -->
 
-## Create an action from this template
+<!-- action-docs-inputs -->
+## Inputs
 
-Click the `Use this Template` and provide the new repo details for your action
+| parameter | description | required | default |
+| - | - | - | - |
+| release | Helm release name. Will be combined with track if set. (required) | `true` |  |
+| namespace | Kubernetes namespace name. (required) | `true` |  |
+| chart | Helm chart path. | `true` |  |
+| helm-path | Path to the helm executable | `false` |  |
+| values | Helm chart values, expected to be a YAML or JSON string. | `false` |  |
+| dry-run | Simulate an upgrade. | `false` | false |
+| atomic | If true, upgrade process rolls back changes made in case of failed upgrade. Defaults to false. | `false` | false |
+| debug | If true, show debug logs during the deployment. Defaults to false. | `false` | false |
+| timeout | Maximum wait time for the deployment to complete before failing. | `false` |  |
+| token | Github repository token. If included and the event is a deployment the deployment_status event will be fired. | `true` | ${{ github.token }} |
+| value-files | Additional value files to apply to the helm chart. Expects JSON encoded array or a string. | `false` |  |
+| chart-version | The version of the helm chart you want to deploy (distinct from app version) | `false` |  |
+| repo-url | Helm chart repository to be added. | `false` |  |
+| repo-alias | Helm repository alias that will be used. | `false` |  |
+| repo-username | Helm repository username if authentication is needed. | `false` |  |
+| repo-password | Helm repository password if authentication is needed. | `false` |  |
+| kube-config | Path to the Kubernetes configuration file | `false` |  |
 
-## Code in Main
 
-> First, you'll need to have a reasonably modern version of `node` handy. This won't work with versions older than 9, for instance.
 
-Install the dependencies  
-```bash
-$ npm install
-```
+<!-- action-docs-inputs -->
 
-Build the typescript and package it for distribution
-```bash
-$ npm run build && npm run package
-```
+<!-- action-docs-outputs -->
 
-Run the tests :heavy_check_mark:  
-```bash
-$ npm test
+<!-- action-docs-outputs -->
 
- PASS  ./index.test.js
-  ✓ throws invalid number (3ms)
-  ✓ wait 500 ms (504ms)
-  ✓ test runs (95ms)
+<!-- action-docs-runs -->
+## Runs
 
-...
-```
+This action is an `node12` action.
 
-## Change action.yml
 
-The action.yml defines the inputs and output for your action.
+<!-- action-docs-runs -->
 
-Update the action.yml with your name, description, inputs and outputs for your action.
+## Examples
 
-See the [documentation](https://help.github.com/en/articles/metadata-syntax-for-github-actions)
+### Deploying into Azure AKS
 
-## Change the Code
-
-Most toolkit and CI/CD operations involve async operations so the action is run in an async function.
-
-```javascript
-import * as core from '@actions/core';
-...
-
-async function run() {
-  try { 
-      ...
-  } 
-  catch (error) {
-    core.setFailed(error.message);
-  }
-}
-
-run()
-```
-
-See the [toolkit documentation](https://github.com/actions/toolkit/blob/master/README.md#packages) for the various packages.
-
-## Publish to a distribution branch
-
-Actions are run from GitHub repos so we will checkin the packed dist folder. 
-
-Then run [ncc](https://github.com/zeit/ncc) and push the results:
-```bash
-$ npm run package
-$ git add dist
-$ git commit -a -m "prod dependencies"
-$ git push origin releases/v1
-```
-
-Note: We recommend using the `--license` option for ncc, which will create a license file for all of the production node modules used in your project.
-
-Your action is now published! :rocket: 
-
-See the [versioning documentation](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md)
-
-## Validate
-
-You can now validate the action by referencing `./` in a workflow in your repo (see [test.yml](.github/workflows/test.yml))
+The followinng snippet shows an example workflow of how to use this action to deploy into Azure AKS:
 
 ```yaml
-uses: ./
-with:
-  milliseconds: 1000
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+      - 'releases/*'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Kube Auth
+        uses: azure/aks-set-context@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          resource-group: my-resource-group
+          cluster-name: my-cluster
+
+      - uses: azure/setup-helm@v1
+        id: helm
+        with:
+          version: '3.*'
+
+      - uses: bankifi/helm-deploy@main
+        with:
+          release: test
+          namespace: test
+          helm-path: ${{ steps.helm.outputs.helm-path }}
+          chart: "my chart"
+          repo-alias: my-repo-alias
+          repo-url: https://my.company.com/repo/helm
+          repo-username: ${{ secrets.HELM_REPO_USERNAME }}
+          repo-password: ${{ secrets.HELM_REPO_PASSWORD }}
+          values: |
+            hello: world
+          value-files: >-
+            [
+              "./helm/test_values1.yaml",
+              "./helm/test_values2.yaml"
+            ]
 ```
 
-See the [actions tab](https://github.com/actions/typescript-action/actions) for runs of this action! :rocket:
-
-## Usage:
-
-After testing you can [create a v1 tag](https://github.com/actions/toolkit/blob/master/docs/action-versioning.md) to reference the stable and latest V1 action
