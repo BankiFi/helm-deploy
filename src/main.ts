@@ -9,19 +9,6 @@ const REGISTRY_CONFIG = './.cache/helm/registry.json'
 const writeToFile = util.promisify(fs.write)
 const closeFile = util.promisify(fs.close)
 
-function parseValues(): object {
-  const values = core.getInput('values')
-  if (!values) {
-    return {}
-  }
-
-  try {
-    return JSON.parse(values)
-  } catch (err) {
-    throw new Error(`The value is not a valid JSON object: ${values}`)
-  }
-}
-
 function parseValueFiles(): string[] {
   const valueFiles = core.getInput('value-files')
   if (valueFiles) {
@@ -36,9 +23,7 @@ function parseValueFiles(): string[] {
   }
 }
 
-async function renderValuesFile(values: object): Promise<string> {
-  const content = JSON.stringify(values)
-
+async function renderValuesFile(content: string): Promise<string> {
   core.debug(`Generating Helm Values file with contents:\n${content}`)
 
   const handle = await temp.open('helm-values.json')
@@ -76,7 +61,7 @@ async function doUpgrade(cmd: string): Promise<void> {
   const atomic = core.getBooleanInput('atomic')
   const dryRun = core.getBooleanInput('dry-run')
   const timeout = core.getInput('timeout')
-  const values = parseValues()
+  const values = core.getInput("values")
   const valueFiles = parseValueFiles()
 
   const args = [
