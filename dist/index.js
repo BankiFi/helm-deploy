@@ -37,7 +37,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.addRepository = void 0;
 const exec = __importStar(__nccwpck_require__(514));
-const REGISTRY_CONFIG = "./.cache/helm/registry.json";
+const REGISTRY_CONFIG = './.cache/helm/registry.json';
 function addRepository(cmd, alias, url, username, password) {
     return __awaiter(this, void 0, void 0, function* () {
         const args = ['repo', 'add', alias, url];
@@ -53,10 +53,8 @@ function addRepository(cmd, alias, url, username, password) {
 exports.addRepository = addRepository;
 function execHelm(cmd, args) {
     return __awaiter(this, void 0, void 0, function* () {
-        const fullArgs = [
-            `--registry-config=${REGISTRY_CONFIG}`
-        ];
-        fullArgs.concat(args);
+        const commonArgs = [`--registry-config=${REGISTRY_CONFIG}`];
+        const fullArgs = commonArgs.concat(args);
         yield exec.exec(cmd, fullArgs);
     });
 }
@@ -114,7 +112,7 @@ function doAddRepository(cmd) {
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const helmCmd = core.getInput("helm-path") || "helm";
+            const helmCmd = core.getInput('helm-path') || 'helm';
             yield doAddRepository(helmCmd);
         }
         catch (error) {

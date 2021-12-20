@@ -21,8 +21,8 @@ export async function addRepository(
 }
 
 async function execHelm(cmd: string, args: string[]): Promise<void> {
-  const fullArgs = [`--registry-config=${REGISTRY_CONFIG}`]
-  fullArgs.concat(args)
+  const commonArgs = [`--registry-config=${REGISTRY_CONFIG}`]
+  const fullArgs = commonArgs.concat(args)
 
   await exec.exec(cmd, fullArgs)
 }
