@@ -22,7 +22,11 @@ inputs:
     required: false
     default: 'false'
   atomic:
-    description: If true, upgrade process rolls back changes made in case of failed upgrade. Defaults to true.
+    description: If true, upgrade process rolls back changes made in case of failed upgrade. Defaults to false.
+    required: false
+    default: 'false'
+  debug:
+    description: If true, show debug logs during the deployment. Defaults to false.
     required: false
     default: 'false'
   timeout:

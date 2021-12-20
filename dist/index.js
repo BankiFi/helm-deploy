@@ -93,8 +93,9 @@ function doUpgrade(cmd) {
         const atomic = core.getBooleanInput('atomic');
         const dryRun = core.getBooleanInput('dry-run');
         const timeout = core.getInput('timeout');
-        const values = core.getInput("values");
+        const values = core.getInput('values');
         const valueFiles = parseValueFiles();
+        const debug = core.getBooleanInput('debug');
         const args = [
             'upgrade',
             release,
@@ -113,6 +114,8 @@ function doUpgrade(cmd) {
             args.push('--atomic');
         if (timeout)
             args.push(`--timeout=${timeout}`);
+        if (debug)
+            args.push('--debug');
         if (values) {
             const file = yield renderValuesFile(values);
             valueFiles.push(file);
