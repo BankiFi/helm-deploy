@@ -1,67 +1,6 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 306:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.addRepository = void 0;
-const exec = __importStar(__nccwpck_require__(514));
-const REGISTRY_CONFIG = './.cache/helm/registry.json';
-function addRepository(cmd, alias, url, username, password) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const args = ['repo', 'add', alias, url];
-        if (username)
-            args.push(`--username=${username}`);
-        if (password)
-            args.push(`--password=${password}`);
-        yield execHelm(cmd, args);
-        yield execHelm(cmd, ['repo', 'update']);
-    });
-}
-exports.addRepository = addRepository;
-function execHelm(cmd, args) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const commonArgs = [`--registry-config=${REGISTRY_CONFIG}`];
-        const fullArgs = commonArgs.concat(args);
-        yield exec.exec(cmd, fullArgs);
-    });
-}
-// export async function deploy(release: string): Promise<void> {}
-
-
-/***/ }),
-
 /***/ 109:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -97,16 +36,80 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
-// import * as exec from '@actions/exec'
-const helm_1 = __nccwpck_require__(306);
+const exec = __importStar(__nccwpck_require__(514));
+const REGISTRY_CONFIG = './.cache/helm/registry.json';
+// function parseValues(): object {
+//   const values = core.getMultilineInput('values')
+//   if (!values) {
+//     return {}
+//   }
+//   try {
+//     return JSON.parse(values.join('\n'))
+//   } catch (err) {
+//     throw new Error(`The value is not a valid JSON object: ${values}`)
+//   }
+// }
+// function parseValueFiles(): string[] {
+//   const valueFiles = core.getInput('value-files')
+//   if (valueFiles) {
+//     try {
+//       return JSON.parse(valueFiles)
+//     } catch (err) {
+//       // assume it is a single file
+//       return [valueFiles]
+//     }
+//   } else {
+//     return []
+//   }
+// }
 function doAddRepository(cmd) {
     return __awaiter(this, void 0, void 0, function* () {
         const alias = core.getInput('repo-alias');
         const url = core.getInput('repo-url');
         const username = core.getInput('repo-username');
         const password = core.getInput('repo-password');
-        core.debug(`Adding Helm repository ${alias} @ ${url}. Username '${username}' and password '${password}'`);
-        yield (0, helm_1.addRepository)(cmd, alias, url, username, password);
+        core.debug(`Adding Helm repository ${alias} @ ${url}. Username '${username}' and password '${password}'.`);
+        const args = ['repo', 'add', alias, url];
+        if (username)
+            args.push(`--username=${username}`);
+        if (password)
+            args.push(`--password=${password}`);
+        yield execHelm(cmd, args);
+        yield execHelm(cmd, ['repo', 'update']);
+    });
+}
+function doUpgrade(cmd) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const release = core.getInput('release', { required: true });
+        const namespace = core.getInput('namespace', { required: true });
+        const chart = core.getInput('chart', { required: true });
+        const chartVersion = core.getInput('chart-version');
+        const dryRun = core.getBooleanInput('dry-run');
+        // const values = parseValues()
+        // const valueFiles = parseValueFiles()
+        const args = [
+            'upgrade',
+            release,
+            chart,
+            '--install',
+            '--wait',
+            `--namespace=${namespace}`
+        ];
+        if (chartVersion)
+            args.push(`--version=${chartVersion}`);
+        if (dryRun)
+            args.push(`--dry-run`);
+        // Object.entries(values).forEach((key, value) => {
+        //   args.push(`--set ${key}=${value}`)
+        // })
+        yield execHelm(cmd, args);
+    });
+}
+function execHelm(cmd, args) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const commonArgs = [`--registry-config=${REGISTRY_CONFIG}`];
+        const fullArgs = commonArgs.concat(args);
+        yield exec.exec(cmd, fullArgs);
     });
 }
 function run() {
@@ -114,6 +117,7 @@ function run() {
         try {
             const helmCmd = core.getInput('helm-path') || 'helm';
             yield doAddRepository(helmCmd);
+            yield doUpgrade(helmCmd);
         }
         catch (error) {
             if (error instanceof Error)
