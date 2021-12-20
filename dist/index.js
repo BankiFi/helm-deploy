@@ -43,18 +43,6 @@ const util = __importStar(__nccwpck_require__(669));
 const REGISTRY_CONFIG = './.cache/helm/registry.json';
 const writeToFile = util.promisify(fs.write);
 const closeFile = util.promisify(fs.close);
-function parseValues() {
-    const values = core.getMultilineInput('values');
-    if (!values) {
-        return {};
-    }
-    try {
-        return JSON.parse(values.join('\n'));
-    }
-    catch (err) {
-        throw new Error(`The value is not a valid JSON object: ${values}`);
-    }
-}
 function parseValueFiles() {
     const valueFiles = core.getInput('value-files');
     if (valueFiles) {
@@ -70,9 +58,8 @@ function parseValueFiles() {
         return [];
     }
 }
-function renderValuesFile(values) {
+function renderValuesFile(content) {
     return __awaiter(this, void 0, void 0, function* () {
-        const content = JSON.stringify(values);
         core.debug(`Generating Helm Values file with contents:\n${content}`);
         const handle = yield temp.open('helm-values.json');
         yield writeToFile(handle.fd, content);
@@ -98,12 +85,15 @@ function doAddRepository(cmd) {
 }
 function doUpgrade(cmd) {
     return __awaiter(this, void 0, void 0, function* () {
+        const kubeConfig = core.getInput('kubeconfig');
         const release = core.getInput('release', { required: true });
         const namespace = core.getInput('namespace', { required: true });
         const chart = core.getInput('chart', { required: true });
         const chartVersion = core.getInput('chart-version');
+        const atomic = core.getBooleanInput('atomic');
         const dryRun = core.getBooleanInput('dry-run');
-        const values = parseValues();
+        const timeout = core.getInput('timeout');
+        const values = core.getInput("values");
         const valueFiles = parseValueFiles();
         const args = [
             'upgrade',
@@ -113,13 +103,16 @@ function doUpgrade(cmd) {
             '--wait',
             `--namespace=${namespace}`
         ];
+        if (kubeConfig)
+            args.push(`--kubeconfig=${kubeConfig}`);
         if (chartVersion)
             args.push(`--version=${chartVersion}`);
         if (dryRun)
-            args.push(`--dry-run`);
-        // Object.entries(values).forEach((key, value) => {
-        //   args.push(`--set ${key}=${value}`)
-        // })
+            args.push('--dry-run');
+        if (atomic)
+            args.push('--atomic');
+        if (timeout)
+            args.push(`--timeout=${timeout}`);
         if (values) {
             const file = yield renderValuesFile(values);
             valueFiles.push(file);

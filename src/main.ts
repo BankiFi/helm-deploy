@@ -61,7 +61,7 @@ async function doUpgrade(cmd: string): Promise<void> {
   const atomic = core.getBooleanInput('atomic')
   const dryRun = core.getBooleanInput('dry-run')
   const timeout = core.getInput('timeout')
-  const values = core.getInput("values")
+  const values = core.getInput('values')
   const valueFiles = parseValueFiles()
 
   const args = [
