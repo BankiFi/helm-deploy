@@ -49,19 +49,21 @@ const REGISTRY_CONFIG = './.cache/helm/registry.json';
 //     throw new Error(`The value is not a valid JSON object: ${values}`)
 //   }
 // }
-// function parseValueFiles(): string[] {
-//   const valueFiles = core.getInput('value-files')
-//   if (valueFiles) {
-//     try {
-//       return JSON.parse(valueFiles)
-//     } catch (err) {
-//       // assume it is a single file
-//       return [valueFiles]
-//     }
-//   } else {
-//     return []
-//   }
-// }
+function parseValueFiles() {
+    const valueFiles = core.getInput('value-files');
+    if (valueFiles) {
+        try {
+            return JSON.parse(valueFiles);
+        }
+        catch (err) {
+            // assume it is a single file
+            return [valueFiles];
+        }
+    }
+    else {
+        return [];
+    }
+}
 function doAddRepository(cmd) {
     return __awaiter(this, void 0, void 0, function* () {
         const alias = core.getInput('repo-alias');
@@ -86,7 +88,7 @@ function doUpgrade(cmd) {
         const chartVersion = core.getInput('chart-version');
         const dryRun = core.getBooleanInput('dry-run');
         // const values = parseValues()
-        // const valueFiles = parseValueFiles()
+        const valueFiles = parseValueFiles();
         const args = [
             'upgrade',
             release,
@@ -95,6 +97,7 @@ function doUpgrade(cmd) {
             '--wait',
             `--namespace=${namespace}`
         ];
+        args.concat(valueFiles.join(','));
         if (chartVersion)
             args.push(`--version=${chartVersion}`);
         if (dryRun)
