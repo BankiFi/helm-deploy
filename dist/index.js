@@ -104,7 +104,10 @@ function doUpgrade(cmd) {
         // Object.entries(values).forEach((key, value) => {
         //   args.push(`--set ${key}=${value}`)
         // })
-        yield execHelm(cmd, args.concat(valueFiles.join(',')));
+        if (valueFiles.length > 0) {
+            args.push(`--values=${valueFiles.join(',')}`);
+        }
+        yield execHelm(cmd, args);
     });
 }
 function execHelm(cmd, args) {

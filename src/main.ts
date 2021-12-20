@@ -74,7 +74,11 @@ async function doUpgrade(cmd: string): Promise<void> {
   //   args.push(`--set ${key}=${value}`)
   // })
 
-  await execHelm(cmd, args.concat(valueFiles.join(',')))
+  if (valueFiles.length > 0) {
+    args.push(`--values=${valueFiles.join(',')}`)
+  }
+
+  await execHelm(cmd, args)
 }
 
 async function execHelm(cmd: string, args: string[]): Promise<void> {
