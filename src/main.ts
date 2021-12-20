@@ -10,13 +10,13 @@ const writeToFile = util.promisify(fs.write)
 const closeFile = util.promisify(fs.close)
 
 function parseValues(): object {
-  const values = core.getMultilineInput('values')
+  const values = core.getInput('values')
   if (!values) {
     return {}
   }
 
   try {
-    return JSON.parse(values.join('\n'))
+    return JSON.parse(values)
   } catch (err) {
     throw new Error(`The value is not a valid JSON object: ${values}`)
   }
@@ -75,6 +75,7 @@ async function doUpgrade(cmd: string): Promise<void> {
   const chartVersion = core.getInput('chart-version')
   const atomic = core.getBooleanInput('atomic')
   const dryRun = core.getBooleanInput('dry-run')
+  const timeout = core.getInput('timeout')
   const values = parseValues()
   const valueFiles = parseValueFiles()
 
@@ -91,6 +92,7 @@ async function doUpgrade(cmd: string): Promise<void> {
   if (chartVersion) args.push(`--version=${chartVersion}`)
   if (dryRun) args.push('--dry-run')
   if (atomic) args.push('--atomic')
+  if (timeout) args.push(`--timeout=${timeout}`)
 
   if (values) {
     const file = await renderValuesFile(values)

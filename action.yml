@@ -25,6 +25,9 @@ inputs:
     description: If true, upgrade process rolls back changes made in case of failed upgrade. Defaults to true.
     required: false
     default: 'false'
+  timeout:
+    description: Maximum wait time for the deployment to complete before failing.
+    required: false
   token:
     description: Github repository token. If included and the event is a deployment
       the deployment_status event will be fired.
