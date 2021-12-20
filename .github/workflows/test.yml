@@ -19,6 +19,13 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Kube Auth
+        uses: azure/aks-set-context@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+          resource-group: baseline-sbox-uksouth
+          cluster-name: baseline-sbox-aks-uksouth
+
       - uses: azure/setup-helm@v1
         id: helm
         with:

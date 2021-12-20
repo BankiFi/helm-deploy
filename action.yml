@@ -51,6 +51,9 @@ inputs:
   repo-password:
     description: Helm repository password if authentication is needed.
     required: false
+  kube-config:
+    description: Path to the Kubernetes configuration file
+    required: false
 runs:
   using: 'node12'
   main: 'dist/index.js'
