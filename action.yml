@@ -11,6 +11,9 @@ inputs:
   chart:
     description: Helm chart path.
     required: true
+  helm-path:
+    description: Path to the helm executable
+    required: false
   values:
     description: Helm chart values, expected to be a YAML or JSON string.
     required: false
@@ -23,7 +26,8 @@ inputs:
   token:
     description: Github repository token. If included and the event is a deployment
       the deployment_status event will be fired.
-    required: false
+    required: true
+    default: ${{ github.token }}
   value-files:
     description: Additional value files to apply to the helm chart. Expects JSON encoded
       array or a string.

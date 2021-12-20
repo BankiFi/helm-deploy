@@ -13,12 +13,14 @@ jobs:
       - uses: actions/checkout@v2
       - run: npm install
       - run: npm run all
+
   test: # make sure the action works on a clean machine without building
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
 
       - uses: azure/setup-helm@v1
+        id: helm
         with:
           helm-version: '3.*'
 
@@ -26,6 +28,7 @@ jobs:
         with:
           release: test
           namespace: test
+          helm-path: ${{ steps.helm.outputs.helm-path }}
           chart: "bankifi/microservice"
           dry-run: true
           repo-alias: bankifi

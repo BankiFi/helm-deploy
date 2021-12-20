@@ -1,6 +1,7 @@
 import * as exec from '@actions/exec'
 
 export async function addRepository(
+  cmd: string,
   alias: string,
   url: string,
   username?: string,
@@ -11,8 +12,8 @@ export async function addRepository(
   if (username) args.push(`--username=${username}`)
   if (password) args.push(`--password=${password}`)
 
-  await exec.exec('helm', args)
-  await exec.exec('helm', ['repo', 'update'])
+  await exec.exec(cmd, args)
+  await exec.exec(cmd, ['repo', 'update'])
 
   return Promise.resolve()
 }
