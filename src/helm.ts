@@ -1,6 +1,6 @@
 import * as exec from '@actions/exec'
 
-const REGISTRY_CONFIG = "./.cache/helm/registry.json"
+const REGISTRY_CONFIG = './.cache/helm/registry.json'
 
 export async function addRepository(
   cmd: string,
@@ -21,12 +21,10 @@ export async function addRepository(
 }
 
 async function execHelm(cmd: string, args: string[]): Promise<void> {
-  const fullArgs = [
-    `--registry-config=${REGISTRY_CONFIG}`
-  ];
-  fullArgs.concat(args);
+  const fullArgs = [`--registry-config=${REGISTRY_CONFIG}`]
+  fullArgs.concat(args)
 
-  await exec.exec(cmd, fullArgs);
+  await exec.exec(cmd, fullArgs)
 }
 
 // export async function deploy(release: string): Promise<void> {}

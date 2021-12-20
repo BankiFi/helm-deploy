@@ -37,19 +37,29 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.addRepository = void 0;
 const exec = __importStar(__nccwpck_require__(514));
-function addRepository(alias, url, username, password) {
+const REGISTRY_CONFIG = "./.cache/helm/registry.json";
+function addRepository(cmd, alias, url, username, password) {
     return __awaiter(this, void 0, void 0, function* () {
         const args = ['repo', 'add', alias, url];
         if (username)
             args.push(`--username=${username}`);
         if (password)
             args.push(`--password=${password}`);
-        yield exec.exec('helm', args);
-        yield exec.exec('helm', ['repo', 'update']);
+        yield execHelm(cmd, args);
+        yield execHelm(cmd, ['repo', 'update']);
         return Promise.resolve();
     });
 }
 exports.addRepository = addRepository;
+function execHelm(cmd, args) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const fullArgs = [
+            `--registry-config=${REGISTRY_CONFIG}`
+        ];
+        fullArgs.concat(args);
+        yield exec.exec(cmd, fullArgs);
+    });
+}
 // export async function deploy(release: string): Promise<void> {}
 
 
@@ -92,22 +102,20 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(186));
 // import * as exec from '@actions/exec'
 const helm_1 = __nccwpck_require__(306);
-function doAddRepository() {
+function doAddRepository(cmd) {
     return __awaiter(this, void 0, void 0, function* () {
         const alias = core.getInput('repo-alias');
         const url = core.getInput('repo-url');
         const username = core.getInput('repo-username');
         const password = core.getInput('repo-password');
-        yield (0, helm_1.addRepository)(alias, url, username, password);
+        yield (0, helm_1.addRepository)(cmd, alias, url, username, password);
     });
 }
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            process.env.XDG_DATA_HOME = '/root/.helm/';
-            process.env.XDG_CACHE_HOME = '/root/.helm/';
-            process.env.XDG_CONFIG_HOME = '/root/.helm/';
-            yield doAddRepository();
+            const helmCmd = core.getInput("helm-path") || "helm";
+            yield doAddRepository(helmCmd);
         }
         catch (error) {
             if (error instanceof Error)

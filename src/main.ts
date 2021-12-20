@@ -13,9 +13,9 @@ async function doAddRepository(cmd: string): Promise<void> {
 
 async function run(): Promise<void> {
   try {
-    const helmCmd = core.getInput("helm-path") || "helm"
+    const helmCmd = core.getInput('helm-path') || 'helm'
 
-    await doAddRepository(helmCmd);
+    await doAddRepository(helmCmd)
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }
