@@ -20,9 +20,11 @@ inputs:
   dry-run:
     description: Simulate an upgrade.
     required: false
+    default: 'false'
   atomic:
     description: If true, upgrade process rolls back changes made in case of failed upgrade. Defaults to true.
     required: false
+    default: 'false'
   token:
     description: Github repository token. If included and the event is a deployment
       the deployment_status event will be fired.
@@ -32,10 +34,10 @@ inputs:
     description: Additional value files to apply to the helm chart. Expects JSON encoded
       array or a string.
     required: false
-  secrets:
-    description: Secret variables to include in value file interpolation. Expects
-      JSON encoded map.
-    required: false
+  # secrets:
+  #   description: Secret variables to include in value file interpolation. Expects
+  #     JSON encoded map.
+  #   required: false
   chart-version:
     description: The version of the helm chart you want to deploy (distinct from app version)
     required: false

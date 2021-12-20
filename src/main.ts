@@ -1,20 +1,26 @@
 import * as core from '@actions/core'
 import * as exec from '@actions/exec'
+import * as fs from 'fs'
+import * as temp from 'temp'
+import * as util from 'util'
 
 const REGISTRY_CONFIG = './.cache/helm/registry.json'
 
-// function parseValues(): object {
-//   const values = core.getMultilineInput('values')
-//   if (!values) {
-//     return {}
-//   }
+const writeToFile = util.promisify(fs.write)
+const closeFile = util.promisify(fs.close)
 
-//   try {
-//     return JSON.parse(values.join('\n'))
-//   } catch (err) {
-//     throw new Error(`The value is not a valid JSON object: ${values}`)
-//   }
-// }
+function parseValues(): object {
+  const values = core.getMultilineInput('values')
+  if (!values) {
+    return {}
+  }
+
+  try {
+    return JSON.parse(values.join('\n'))
+  } catch (err) {
+    throw new Error(`The value is not a valid JSON object: ${values}`)
+  }
+}
 
 function parseValueFiles(): string[] {
   const valueFiles = core.getInput('value-files')
@@ -28,6 +34,18 @@ function parseValueFiles(): string[] {
   } else {
     return []
   }
+}
+
+async function renderValuesFile(values: object): Promise<string> {
+  const content = JSON.stringify(values)
+
+  core.debug(`Generating Helm Values file with contents:\n${content}`)
+
+  const handle = await temp.open('helm-values.json')
+
+  await writeToFile(handle.fd, content)
+  await closeFile(handle.fd)
+  return handle.path
 }
 
 async function doAddRepository(cmd: string): Promise<void> {
@@ -50,12 +68,14 @@ async function doAddRepository(cmd: string): Promise<void> {
 }
 
 async function doUpgrade(cmd: string): Promise<void> {
+  const kubeConfig = core.getInput('kubeconfig')
   const release = core.getInput('release', {required: true})
   const namespace = core.getInput('namespace', {required: true})
   const chart = core.getInput('chart', {required: true})
   const chartVersion = core.getInput('chart-version')
+  const atomic = core.getBooleanInput('atomic')
   const dryRun = core.getBooleanInput('dry-run')
-  // const values = parseValues()
+  const values = parseValues()
   const valueFiles = parseValueFiles()
 
   const args = [
@@ -67,13 +87,15 @@ async function doUpgrade(cmd: string): Promise<void> {
     `--namespace=${namespace}`
   ]
 
+  if (kubeConfig) args.push(`--kubeconfig=${kubeConfig}`)
   if (chartVersion) args.push(`--version=${chartVersion}`)
-  if (dryRun) args.push(`--dry-run`)
+  if (dryRun) args.push('--dry-run')
+  if (atomic) args.push('--atomic')
 
-  // Object.entries(values).forEach((key, value) => {
-  //   args.push(`--set ${key}=${value}`)
-  // })
-
+  if (values) {
+    const file = await renderValuesFile(values)
+    valueFiles.push(file)
+  }
   if (valueFiles.length > 0) {
     args.push(`--values=${valueFiles.join(',')}`)
   }
