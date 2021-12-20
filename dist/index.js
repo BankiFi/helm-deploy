@@ -47,7 +47,6 @@ function addRepository(cmd, alias, url, username, password) {
             args.push(`--password=${password}`);
         yield execHelm(cmd, args);
         yield execHelm(cmd, ['repo', 'update']);
-        return Promise.resolve();
     });
 }
 exports.addRepository = addRepository;
@@ -106,6 +105,7 @@ function doAddRepository(cmd) {
         const url = core.getInput('repo-url');
         const username = core.getInput('repo-username');
         const password = core.getInput('repo-password');
+        core.debug(`Adding Helm repository ${alias} @ ${url}. Username '${username}' and password '${password}'`);
         yield (0, helm_1.addRepository)(cmd, alias, url, username, password);
     });
 }

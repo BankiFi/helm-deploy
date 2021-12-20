@@ -8,6 +8,9 @@ async function doAddRepository(cmd: string): Promise<void> {
   const username = core.getInput('repo-username')
   const password = core.getInput('repo-password')
 
+  core.debug(
+    `Adding Helm repository ${alias} @ ${url}. Username '${username}' and password '${password}'`
+  )
   await addRepository(cmd, alias, url, username, password)
 }
 

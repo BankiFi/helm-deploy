@@ -9,15 +9,13 @@ export async function addRepository(
   username?: string,
   password?: string
 ): Promise<void> {
-  var args = ['repo', 'add', alias, url]
+  const args = ['repo', 'add', alias, url]
 
   if (username) args.push(`--username=${username}`)
   if (password) args.push(`--password=${password}`)
 
   await execHelm(cmd, args)
   await execHelm(cmd, ['repo', 'update'])
-
-  return Promise.resolve()
 }
 
 async function execHelm(cmd: string, args: string[]): Promise<void> {
