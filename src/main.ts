@@ -36,20 +36,23 @@ async function renderValuesFile(content: string): Promise<string> {
 async function doAddRepository(cmd: string): Promise<void> {
   const alias = core.getInput('repo-alias')
   const url = core.getInput('repo-url')
-  const username = core.getInput('repo-username')
-  const password = core.getInput('repo-password')
 
-  core.debug(
-    `Adding Helm repository ${alias} @ ${url}. Username '${username}' and password '${password}'.`
-  )
+  if (alias && url) {
+    const username = core.getInput('repo-username')
+    const password = core.getInput('repo-password')
 
-  const args = ['repo', 'add', alias, url]
+    core.debug(
+      `Adding Helm repository ${alias} @ ${url}. Username '${username}' and password '${password}'.`
+    )
 
-  if (username) args.push(`--username=${username}`)
-  if (password) args.push(`--password=${password}`)
+    const args = ['repo', 'add', alias, url]
 
-  await execHelm(cmd, args)
-  await execHelm(cmd, ['repo', 'update'])
+    if (username) args.push(`--username=${username}`)
+    if (password) args.push(`--password=${password}`)
+
+    await execHelm(cmd, args)
+    await execHelm(cmd, ['repo', 'update'])
+  }
 }
 
 async function doUpgrade(cmd: string): Promise<void> {
