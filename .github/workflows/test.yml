@@ -26,7 +26,7 @@ jobs:
           resource-group: baseline-sbox-uksouth
           cluster-name: baseline-sbox-aks-uksouth
 
-      - uses: azure/setup-helm@v1
+      - uses: azure/setup-helm@v3
         id: helm
         with:
           version: '3.*'
